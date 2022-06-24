@@ -94,7 +94,7 @@ def main():
     filePath = os.path.join(base_path,'rawdata')
 
     files = os.listdir(filePath)
-    for file_index,file in enumerate(sorted(files[:10])):
+    for file_index,file in enumerate(sorted(files)):
         try:
             print('processing:' ,file)
             file = os.path.join(filePath, file)
