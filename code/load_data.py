@@ -1,15 +1,17 @@
 import functools
 import os
+import numpy as np
 # ==================global================
 Term_list = []
 Term_set = set([])
 Term_dict = {}
-Term_cnt = 0
+Term_ind = 0
 
 # ==================class================
+
 # 主链节点的对象
 class Term:
-    def __init__(self, next, term = "", df = 0) -> None:
+    def __init__(self, next, term="", df=0) -> None:
         self.term = term
         self.df = df
         self.next = next
@@ -17,7 +19,7 @@ class Term:
     def set_element(self, term, docID) -> None:
         self.term = term
         self.docID = docID
-    
+
     def add_df(self) -> None:
         self.df += 1
 
@@ -30,15 +32,18 @@ class Term:
     def get_df(self) -> int:
         return self.df
 
+
 # 主链中分支节点的对象
 class Node:
-    def __init__(self, docID = 0, tf = 0) -> None:
+    def __init__(self, docID=0, tf=0) -> None:
         self.docID = docID
         self.tf = tf
 
     def get_docID(self) -> int:
         return self.docID
 
+    def get_tf(self) -> int:
+        return self.tf
 
 # 检查当前词项是否为中文词项
 def check(term):
@@ -49,32 +54,34 @@ def check(term):
     return False
 
 
-def insert_docID(in_term, docID):
+def insert_docID(in_term, docID, term_fre):
     in_term.add_df()
     docID_list = in_term.get_next()
-    new_node = Node(docID)
+    new_node = Node(docID, term_fre)
     docID_list.append(new_node)
 
 
 # 还需要书写一个插入函数负责进行词项插入主链中
-def insert_Term(term, docID) -> None:
-    global Term_list, Term_set, Term_dict, Term_cnt
+def insert_Term(term, docID, term_fre) -> None:
+    global Term_list, Term_set, Term_dict, Term_ind
     if term in Term_set:
         in_term = Term_list[Term_dict[term]]
-        insert_docID(in_term, docID)
+        insert_docID(in_term, docID, term_fre)
     else:
-        Term_dict[term] = Term_cnt
-        Term_cnt += 1
+        Term_dict[term] = Term_ind
+        Term_ind += 1
         Term_set.add(term)
         new_Term = Term([], term)
         # print(term)
-        insert_docID(new_Term, docID)
+        insert_docID(new_Term, docID, term_fre)
         Term_list.append(new_Term)
-    
+
 
 def my_compare(x, y):
-    if x.get_term() > y.get_term(): return 1
-    elif x.get_term() < y.get_term(): return -1
+    if x.get_term() > y.get_term():
+        return 1
+    elif x.get_term() < y.get_term():
+        return -1
     return 0
 
 
@@ -87,33 +94,37 @@ def main():
     filePath = os.path.join(base_path,'rawdata')
 
     files = os.listdir(filePath)
-    for file_index,file in enumerate(sorted(files)):
+    for file_index,file in enumerate(sorted(files[:10])):
         try:
-            print('processing:' ,file_index)
+            print('processing:' ,file)
             file = os.path.join(filePath, file)
             with open(file, 'r', errors='ignore', encoding='gbk') as fp:
                 terms= fp.read().split()
-            terms = list(set(terms))
-            for term in terms:
+            terms = dict(zip(*np.unique(terms, return_counts=True)))
+            for term in terms.keys():
                 if check(term) and (term not in stopwords):
                     # 这里可以再候补一个操作就是数出df即在文章中出现的个数
                     # 将来还会添加的要求就是尽可能的也可以得出在文章中的位置
-                    insert_Term(term, file_index)
+                    insert_Term(term, file_index,terms[term])
         except OSError as e:
             print("File open Error : %s" % e)
-        except Exception as e:
-            print("Unknown Error : %s" % e)
+        # except Exception as e:
+        #     print("Unknown Error : %s" % e)
 
     Term_list.sort(key=functools.cmp_to_key(my_compare))
-
-    with open('invert_index.txt', 'w') as fp:
+    # 保存为json文件
+    with open('invert_index.json', 'w') as fp:
+        fp.write('{')
         for term in Term_list:
-            fp.write(f"{term.get_term()} {term.get_df()} : ")
+            fp.write(f'\t"{term.get_term()}_{term.get_df()}":')
             term_list = term.get_next()
-            for doc in term_list:
-                fp.write(f"{doc.get_docID()} ")
-            fp.write("\n")
+            fp.write('[')
+            fp.write(f'{{"{term_list[0].get_docID()}":{term_list[0].get_tf()}}}')
+            for doc in term_list[1:]:
+                fp.write(f',{{"{doc.get_docID()}":{doc.get_tf()}}}')
+            fp.write("],\n")
         fp.flush()
+        fp.write('}')
 
 if __name__=="__main__":
     main()
