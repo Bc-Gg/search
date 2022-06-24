@@ -3,6 +3,16 @@ import os
 
 extra_and_dict:dict = {}
 
+def fn_timer(fn):
+    def function_timer(*args, **kwargs):
+        """装饰器"""
+        from time import time
+        t = time()
+        result = fn(*args, **kwargs)
+        print('%s函数运行%.3f秒' % (fn.__name__, time() - t))
+        return result
+    return function_timer
+
 def AND_func(key_word:str ,ans:set ,invert_index:dict):
     temp_set = set([docID for docID, _ in invert_index[key_word]])
     temp_set = ans & temp_set
@@ -38,6 +48,7 @@ def read_invert_index():
         invert_index_dict = eval(fp.read())
     return invert_index_dict
 
+@fn_timer
 def main():
     global extra_and_dict
     ans = set()
