@@ -1,8 +1,12 @@
 import functools
 import os
-import chardet
-from requests import head
+# ==================global================
+Term_list = []
+Term_set = set([])
+Term_dict = {}
+Term_cnt = 0
 
+# ==================class================
 # 主链节点的对象
 class Term:
     def __init__(self, next, term = "", df = 0) -> None:
@@ -34,12 +38,6 @@ class Node:
 
     def get_docID(self) -> int:
         return self.docID
-
-
-Term_list = []
-Term_set = set([])
-Term_dict = {}
-Term_cnt = 0
 
 
 # 检查当前词项是否为中文词项
@@ -82,31 +80,22 @@ def my_compare(x, y):
 
 def main():
     # 创建停用词表 用于过滤掉停用词
-    with open('stopwords.txt', 'r', encoding='utf-8') as f:
-        stopwords = [x.strip() for x in f.readlines()]
-
-    filePath = 'D:\desk\大二小学期\智能信息检索\code\已分词数据'
-    fileNames = os.listdir(filePath)
-    docID = 0
-    for fileName in fileNames:
-        docID += 1
+    with open('stop_word.txt', 'r', encoding='utf-8') as f:
+        stopwords = list(f.read().split())
+    base_path = os.path.abspath((os.path.join(os.getcwd(),'..')))
+    filePath = os.path.join(base_path,'rawdata')
+    files = os.listdir(filePath)
+    for ind,file in enumerate(files):
         try:
-            print("正在处理第%d个文件" % docID)
-            fileName = filePath + "\\" + fileName
-            fp = open(fileName, 'r', errors='ignore')
-            content = fp.read()
-            terms = content.split()
-            fp.close()
-            # print(docID)
-            terms = list(set(terms))
+            print('processing:' ,ind)
+            file = os.path.join(filePath, file)
+            with open(file, 'r', errors='ignore', encoding='gbk') as fp:
+                terms= list(set(fp.read().split()))
             for term in terms:
                 if check(term) and (term not in stopwords):
-                    
                     # 这里可以再候补一个操作就是数出df即在文章中出现的个数
                     # 将来还会添加的要求就是尽可能的也可以得出在文章中的位置
-
-                    insert_Term(term, docID)
-            # if docID == 10: break
+                    insert_Term(term, ind)
         except OSError as e:
             print("File open Error : %s" % e)
         except Exception as e:
@@ -114,12 +103,12 @@ def main():
 
     Term_list.sort(key=functools.cmp_to_key(my_compare))
 
-    with open("dchain.txt", 'w') as fp:
+    with open(os.path.join(base_path, '../invert_index.txt'), 'w') as fp:
         for term in Term_list:
-            fp.write("{} {} : ".format(term.get_term(), term.get_df()))
-            tl = term.get_next()
-            for doc in tl:
-                fp.write("%d " % doc.get_docID())
+            fp.write(f"{term.get_term()} {term.get_df()} : ")
+            term_list = term.get_next()
+            for doc in term_list:
+                fp.write(f"{doc.get_docID} ")
             fp.write("\n")
         fp.flush()
 
