@@ -80,22 +80,25 @@ def my_compare(x, y):
 
 def main():
     # 创建停用词表 用于过滤掉停用词
-    with open('stop_word.txt', 'r', encoding='utf-8') as f:
+    with open('/Users/liubenchen/Desktop/文献检索/search/code/stop_word.txt', 'r', encoding='utf-8') as f:
         stopwords = list(f.read().split())
-    base_path = os.path.abspath((os.path.join(os.getcwd(),'..')))
+
+    base_path = os.path.abspath((os.path.join(os.getcwd(), '..')))
     filePath = os.path.join(base_path,'rawdata')
+
     files = os.listdir(filePath)
-    for ind,file in enumerate(files):
+    for file_index,file in enumerate(sorted(files)):
         try:
-            print('processing:' ,ind)
+            print('processing:' ,file_index)
             file = os.path.join(filePath, file)
             with open(file, 'r', errors='ignore', encoding='gbk') as fp:
-                terms= list(set(fp.read().split()))
+                terms= fp.read().split()
+            terms = list(set(terms))
             for term in terms:
                 if check(term) and (term not in stopwords):
                     # 这里可以再候补一个操作就是数出df即在文章中出现的个数
                     # 将来还会添加的要求就是尽可能的也可以得出在文章中的位置
-                    insert_Term(term, ind)
+                    insert_Term(term, file_index)
         except OSError as e:
             print("File open Error : %s" % e)
         except Exception as e:
@@ -103,12 +106,12 @@ def main():
 
     Term_list.sort(key=functools.cmp_to_key(my_compare))
 
-    with open(os.path.join(base_path, '../invert_index.txt'), 'w') as fp:
+    with open('invert_index.txt', 'w') as fp:
         for term in Term_list:
             fp.write(f"{term.get_term()} {term.get_df()} : ")
             term_list = term.get_next()
             for doc in term_list:
-                fp.write(f"{doc.get_docID} ")
+                fp.write(f"{doc.get_docID()} ")
             fp.write("\n")
         fp.flush()
 
