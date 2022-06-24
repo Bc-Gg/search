@@ -113,17 +113,18 @@ def main():
 
     Term_list.sort(key=functools.cmp_to_key(my_compare))
     # 保存为json文件
-    with open('invert_index.json', 'w') as fp:
+    with open('invert_index.txt', 'w') as fp:
         fp.write('{')
         for term in Term_list:
-            fp.write(f'\t"{term.get_term()}_{term.get_df()}":')
+            # 这个最后要打开json把第一个逗号删掉
+            # fp.write(f'\t"{term.get_term()}_{term.get_df()}":')
+            fp.write(f'\n,"{term.get_term()}":')
             term_list = term.get_next()
             fp.write('[')
-            fp.write(f'{{"{term_list[0].get_docID()}":{term_list[0].get_tf()}}}')
+            fp.write(f'({term_list[0].get_docID()},{term_list[0].get_tf()})')
             for doc in term_list[1:]:
-                fp.write(f',{{"{doc.get_docID()}":{doc.get_tf()}}}')
-            fp.write("],\n")
-        fp.flush()
+                fp.write(f',({doc.get_docID()},{doc.get_tf()})')
+            fp.write("]")
         fp.write('}')
 
 if __name__=="__main__":
