@@ -6,7 +6,6 @@ Term_list = []
 Term_set = set([])
 Term_dict = {}
 Term_ind = 0
-
 # ==================class================
 
 # 主链节点的对象
@@ -87,7 +86,7 @@ def my_compare(x, y):
 
 def main():
     # 创建停用词表 用于过滤掉停用词
-    with open('/Users/liubenchen/Desktop/文献检索/search/code/stop_word.txt', 'r', encoding='utf-8') as f:
+    with open('code/stop_word.txt', 'r', encoding='utf-8') as f:
         stopwords = list(f.read().split())
 
     base_path = os.path.abspath((os.path.join(os.getcwd(), '..')))
@@ -103,13 +102,10 @@ def main():
             terms = dict(zip(*np.unique(terms, return_counts=True)))
             for term in terms.keys():
                 if check(term) and (term not in stopwords):
-                    # 这里可以再候补一个操作就是数出df即在文章中出现的个数
                     # 将来还会添加的要求就是尽可能的也可以得出在文章中的位置
                     insert_Term(term, file_index,terms[term])
-        except OSError as e:
-            print("File open Error : %s" % e)
-        # except Exception as e:
-        #     print("Unknown Error : %s" % e)
+        except Exception as e:
+            print("Error : %s" % e)
 
     Term_list.sort(key=functools.cmp_to_key(my_compare))
     # 保存为json文件

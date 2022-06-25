@@ -49,11 +49,9 @@ class Form(QDialog):
 
 def main():
     global extra_and_dict
-
     app = QApplication(sys.argv)
     form = Form()
     form.show()
-
     sys.exit(app.exec())
 
 if __name__ == '__main__':
