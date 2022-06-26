@@ -52,7 +52,7 @@ def db_query(bool_filter, invert_index):
         func= eval(operator+'_func')
         for key_word in key_words:
             ans = func(key_word,ans,invert_index)
-    return ans , sorted(extra_and_dict.items(), key=lambda x: x[1], reverse=True)
+    return list(ans) , list(sorted(extra_and_dict.items(), key=lambda x: x[1], reverse=True))
 
 def main():
     invert_index = read_invert_index()
