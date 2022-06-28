@@ -3,6 +3,7 @@ import os
 
 extra_and_dict:dict = {}
 
+
 def fn_timer(fn):
     def function_timer(*args, **kwargs):
         """装饰器"""
@@ -13,26 +14,27 @@ def fn_timer(fn):
         return result
     return function_timer
 
-def AND_func(key_word:str ,ans:set ,invert_index:dict):
-    temp_set = set([docID for docID, _ in invert_index[key_word]])
-    ans = ans & temp_set if len(ans) else temp_set
-    for docID, num in invert_index[key_word]:
-        if docID in temp_set:
-            if docID in extra_and_dict.keys():
-                extra_and_dict[docID] += num
+def AND_func(ans:set ,index_table):
+    temp_set = set(map(lambda x: x[0], index_table))
+    return temp_set if ans == set() else ans & temp_set
+
+def generate_extra_dict(ans, AND_filter, invert_index):
+    for word in AND_filter:
+        for docID, num in invert_index[word]:
+            if docID in ans:
+                if docID in extra_and_dict.keys():
+                    extra_and_dict[docID] += num
+                else:
+                    extra_and_dict[docID] = num
             else:
-                extra_and_dict[docID] = num
-        else:
-            extra_and_dict.pop(docID,None)
-    return ans
+                extra_and_dict.pop(docID, None)
 
-def OR_func(key_word:str ,ans:set ,invert_index:dict):
-    temp_set = set([x for x, _ in invert_index[key_word]])
-    return ans | temp_set
 
-def NOT_func(key_word:str ,ans:set ,invert_index:dict):
-    temp_set = set([x for x, _ in invert_index[key_word]])
-    return ans - temp_set
+def OR_func(ans:set ,index_table):
+    return ans | set(map(lambda x: x[0], index_table))
+
+def NOT_func(ans:set ,index_table):
+    return ans - set(map(lambda x: x[0], index_table))
 
 def get_bool_filter() -> dict:
     query_filter_file_path = os.path.join(os.getcwd(), 'query.json')
@@ -46,19 +48,20 @@ def read_invert_index():
 
 # @fn_timer
 def db_query(bool_filter, invert_index):
-    global extra_and_dict
     ans = set()
     for operator, key_words in bool_filter.items():
         func= eval(operator+'_func')
         for key_word in key_words:
-            ans = func(key_word,ans,invert_index)
-    return list(ans) , list(sorted(extra_and_dict.items(), key=lambda x: x[1], reverse=True))
+            ans = func(ans,invert_index[key_word])
+    return ans
 
 def main():
     invert_index = read_invert_index()
     bool_filter = get_bool_filter()
     # print(bool_filter)
-    ans ,sorted_ans = db_query(bool_filter, invert_index)
+    ans = db_query(bool_filter, invert_index)
+    generate_extra_dict(ans,bool_filter['AND'],invert_index)
+    sorted_ans = list(sorted(extra_and_dict.items(), key=lambda x: x[1], reverse=True))
     print(ans, sorted_ans)
 
 

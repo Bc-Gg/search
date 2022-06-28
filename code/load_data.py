@@ -93,7 +93,7 @@ def main():
     filePath = os.path.join(base_path,'rawdata')
 
     files = os.listdir(filePath)
-    for file_index,file in enumerate(sorted(files[:10])):
+    for file_index,file in enumerate(sorted(files)):
         try:
             print('processing:' ,file)
             file = os.path.join(filePath, file)
@@ -116,11 +116,11 @@ def main():
             # fp.write(f'\t"{term.get_term()}_{term.get_df()}":')
             fp.write(f'\n,"{term.get_term()}":')
             term_list = term.get_next()
-            fp.write('[')
+            fp.write('{')
             fp.write(f'({term_list[0].get_docID()},{term_list[0].get_tf()})')
             for doc in term_list[1:]:
                 fp.write(f',({doc.get_docID()},{doc.get_tf()})')
-            fp.write("]")
+            fp.write("}")
         fp.write('}')
 
 if __name__=="__main__":

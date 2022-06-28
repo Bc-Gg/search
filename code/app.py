@@ -1,7 +1,7 @@
 import sys
 from PySide6.QtWidgets import (QLineEdit, QPushButton, QApplication,QVBoxLayout, QDialog,
                                QTextBrowser, QButtonGroup, QRadioButton)
-
+from time import time
 extra_and_dict: dict = {}
 from bool_query import *
 
@@ -59,24 +59,24 @@ class Form(QDialog):
         self.select_num = int(item.text())
 
     def get_length(self, a):
-        if not self.select_num == -1:
+        if self.select_num == -1:
             return a
         return self.select_num
 
     # 数据库查询
     def query(self):
-        print(self.buttongroup.buttons())
-        print(self.buttongroup.checkedButton())
         self.result.clear()
         extra_and_dict.clear()
         bool_filter = reload_query_filter(self.AND_edit.text(), self.OR_edit.text(), self.NOT_edit.text(), )
-        from time import time
         t = time()
-        ans, sorted_ans = db_query(bool_filter, self.invert_index)
+        ans = db_query(bool_filter, self.invert_index)
         self.result.append('query操作总共花费：' + str(round((time() - t), 5)) + 's\n')
+        generate_extra_dict(ans, bool_filter['AND'], self.invert_index)
+        ans = list(ans)
+        sorted_ans = list(sorted(extra_and_dict.items(), key=lambda x: x[1], reverse=True))
         ans_len = self.get_length(len(ans))
         ans, sorted_ans = ans[:ans_len], sorted_ans[:ans_len]
-        self.result.append(str(ans) + '\n' + str(sorted_ans))
+        self.result.append(str(ans_len)+'\n'+str(ans) + '\n' + str(sorted_ans))
 
 
 def main():
