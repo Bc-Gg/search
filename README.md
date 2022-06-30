@@ -4,7 +4,7 @@
 
 ## QuickStart
 1. 请将文件规划为如下文件树路径  
-PS：其中rawdata文件夹下是数据集的解压缩包
+PS：其中rawdata文件夹下是数据集的解压缩包。  
 ![img.png](images/img.png)
 2. 请在cmd中一行一行输入如下命令
 ```shell
