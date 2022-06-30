@@ -2,8 +2,9 @@ import sys
 from PySide6.QtWidgets import (QLineEdit, QPushButton, QApplication,QVBoxLayout, QDialog,
                                QTextBrowser, QButtonGroup, QRadioButton)
 from time import time
-extra_and_dict: dict = {}
 from bool_query import *
+
+extra_and_dict: dict = {}
 
 
 def reload_query_filter(and_word: str, or_word: str, not_word: str):
