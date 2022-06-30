@@ -1,6 +1,7 @@
 import functools
 import os
 import numpy as np
+from math import log10
 # ==================global================
 Term_list = []
 Term_set = set([])
@@ -43,6 +44,9 @@ class Node:
 
     def get_tf(self) -> int:
         return self.tf
+
+    def get_tfidf(self, df):
+        return round((1 + log10(self.get_tf())) * log10(532.0 / float(df)), 5)
 
 # 检查当前词项是否为中文词项
 def check(term):
@@ -94,6 +98,7 @@ def main():
 
     files = os.listdir(filePath)
     for file_index,file in enumerate(sorted(files)):
+    # for file_index, file in enumerate(files[:10]):
         try:
             print('processing:' ,file)
             file = os.path.join(filePath, file)
@@ -117,9 +122,11 @@ def main():
             fp.write(f'\n,"{term.get_term()}":')
             term_list = term.get_next()
             fp.write('{')
-            fp.write(f'({term_list[0].get_docID()},{term_list[0].get_tf()})')
+            fp.write(f'({term_list[0].get_docID()},{term_list[0].get_tfidf(term.get_df())})')
+            # fp.write(f'({term_list[0].get_docID()},{term_list[0].get_tf()})')
             for doc in term_list[1:]:
-                fp.write(f',({doc.get_docID()},{doc.get_tf()})')
+                fp.write(f',({doc.get_docID()},{doc.get_tfidf(term.get_df())})')
+                # fp.write(f',({doc.get_docID()},{doc.get_tf()})')
             fp.write("}")
         fp.write('}')
 
