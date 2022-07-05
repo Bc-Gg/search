@@ -48,12 +48,15 @@ def read_invert_index():
 
 # @fn_timer
 def db_query(bool_filter, invert_index):
-    ans = set()
-    for operator, key_words in bool_filter.items():
-        func= eval(operator+'_func')
-        for key_word in key_words:
-            ans = func(ans,invert_index[key_word])
-    return ans
+    try :
+        ans = set()
+        for operator, key_words in bool_filter.items():
+            func= eval(operator+'_func')
+            for key_word in key_words:
+                ans = func(ans,invert_index[key_word])
+        return ans, True
+    except Exception:
+        set(), False
 
 def main():
     invert_index = read_invert_index()

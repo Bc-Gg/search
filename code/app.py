@@ -4,8 +4,6 @@ from PySide6.QtWidgets import (QLineEdit, QPushButton, QApplication,QVBoxLayout,
 from time import time
 from bool_query import *
 
-extra_and_dict: dict = {}
-
 
 def reload_query_filter(and_word: str, or_word: str, not_word: str):
     ans = dict()
@@ -33,10 +31,13 @@ class Form(QDialog):
         self.button2.setText('20')
         self.button3 = QRadioButton()
         self.button3.setText('50')
+        self.button4 = QRadioButton()
+        self.button4.setText('-1')
         self.buttongroup = QButtonGroup()
         self.buttongroup.addButton(self.button1, 1)
         self.buttongroup.addButton(self.button2, 2)
         self.buttongroup.addButton(self.button3, 3)
+        self.buttongroup.addButton(self.button4, -1)
         # 创建布局并添加组件
         layout = QVBoxLayout()
         layout.addWidget(self.AND_edit)
@@ -47,6 +48,7 @@ class Form(QDialog):
         layout.addWidget(self.button1)
         layout.addWidget(self.button2)
         layout.addWidget(self.button3)
+        layout.addWidget(self.button4)
         # 应用布局
         self.setLayout(layout)
         # 连接query槽和按钮单击信号
@@ -70,14 +72,18 @@ class Form(QDialog):
         extra_and_dict.clear()
         bool_filter = reload_query_filter(self.AND_edit.text(), self.OR_edit.text(), self.NOT_edit.text(), )
         t = time()
-        ans = db_query(bool_filter, self.invert_index)
-        self.result.append('query操作总共花费：' + str(round((time() - t), 5)) + 's\n')
+        ans, message = db_query(bool_filter, self.invert_index)
+        self.result.append('query操作总共花费：' + str(round((time() - t), 5))*1000 + 'ms\n')
+        if not message:
+            self.result.append('查询失败，查无此词\n')
+        else :
+            self.result.append('查询成功！\n')
         generate_extra_dict(ans, bool_filter['AND'], self.invert_index)
         ans = list(ans)
         sorted_ans = list(sorted(extra_and_dict.items(), key=lambda x: x[1], reverse=True))
         ans_len = self.get_length(len(ans))
         ans, sorted_ans = ans[:ans_len], sorted_ans[:ans_len]
-        self.result.append(str(ans_len)+'\n'+str(ans) + '\n' + str(sorted_ans))
+        self.result.append(str(ans_len)+'\n查询列表为：'+str(ans) + '\n排序后列表为：' + str(sorted_ans))
 
 
 def main():

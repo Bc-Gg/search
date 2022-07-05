@@ -123,10 +123,8 @@ def main():
             term_list = term.get_next()
             fp.write('{')
             fp.write(f'({term_list[0].get_docID()},{term_list[0].get_tfidf(term.get_df())})')
-            # fp.write(f'({term_list[0].get_docID()},{term_list[0].get_tf()})')
             for doc in term_list[1:]:
                 fp.write(f',({doc.get_docID()},{doc.get_tfidf(term.get_df())})')
-                # fp.write(f',({doc.get_docID()},{doc.get_tf()})')
             fp.write("}")
         fp.write('}')
 
