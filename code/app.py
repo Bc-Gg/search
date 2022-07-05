@@ -1,6 +1,6 @@
 import sys
 from PySide6.QtWidgets import (QLineEdit, QPushButton, QApplication,QVBoxLayout, QDialog,
-                               QTextBrowser, QButtonGroup, QRadioButton)
+                               QTextBrowser, QButtonGroup, QRadioButton,QLabel)
 from time import time
 from bool_query import *
 
@@ -49,8 +49,11 @@ class Form(QDialog):
         self.buttongroup.addButton(self.button4, -1)
         # 创建布局并添加组件
         layout = QVBoxLayout()
+        layout.addWidget(QLabel('AND'))
         layout.addWidget(self.AND_edit)
+        layout.addWidget(QLabel('OR'))
         layout.addWidget(self.OR_edit)
+        layout.addWidget(QLabel('NOT'))
         layout.addWidget(self.NOT_edit)
         layout.addWidget(self.button)
         layout.addWidget(self.result)
