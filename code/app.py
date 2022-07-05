@@ -4,6 +4,11 @@ from PySide6.QtWidgets import (QLineEdit, QPushButton, QApplication,QVBoxLayout,
 from time import time
 from bool_query import *
 
+def init_path():
+    base_path = os.path.abspath((os.path.join(os.getcwd(), '..')))
+    output_path = os.path.join(base_path, 'query')
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
 
 def reload_query_filter(and_word: str, or_word: str, not_word: str):
     ans = dict()
@@ -12,6 +17,10 @@ def reload_query_filter(and_word: str, or_word: str, not_word: str):
     ans['NOT'] = not_word.split()
     return ans
 
+def load_file_name():
+    base_path = os.path.abspath((os.path.join(os.getcwd(), '../..')))
+    filePath = os.path.join(base_path, 'rawdata')
+    return sorted(os.listdir(filePath))
 
 class Form(QDialog):
     def __init__(self, parent=None):
@@ -57,6 +66,7 @@ class Form(QDialog):
         self.buttongroup.buttonClicked.connect(self.change_select_num)
         # 读取数据成员
         self.invert_index = read_invert_index()
+        self.filenames = load_file_name()
 
     def change_select_num(self, item):
         self.select_num = int(item.text())
@@ -65,7 +75,14 @@ class Form(QDialog):
         if self.select_num == -1:
             return a
         return self.select_num
-
+    def save_as_txt(self, words, ans):
+        base_path = os.path.abspath((os.path.join(os.getcwd(), '..')))
+        output_path = os.path.join(base_path, 'query')
+        filename = ' '.join(words) + '.txt'
+        filepath = os.path.join(output_path, filename)
+        with open(filepath , 'w') as fp:
+            for index,_ in ans:
+                fp.write(self.filenames[index] + '\n')
     # 数据库查询
     def query(self):
         self.result.clear()
@@ -73,7 +90,7 @@ class Form(QDialog):
         bool_filter = reload_query_filter(self.AND_edit.text(), self.OR_edit.text(), self.NOT_edit.text(), )
         t = time()
         ans, message = db_query(bool_filter, self.invert_index)
-        self.result.append('query操作总共花费：' + str(round((time() - t), 5))*1000 + 'ms\n')
+        self.result.append('query操作总共花费：' + str(round((time() - t), 5)*1000) + 'ms\n')
         if not message:
             self.result.append('查询失败，查无此词\n')
         else :
@@ -84,9 +101,12 @@ class Form(QDialog):
         ans_len = self.get_length(len(ans))
         ans, sorted_ans = ans[:ans_len], sorted_ans[:ans_len]
         self.result.append(str(ans_len)+'\n查询列表为：'+str(ans) + '\n排序后列表为：' + str(sorted_ans))
+        self.save_as_txt(bool_filter['AND'], sorted_ans)
+
 
 
 def main():
+    init_path()
     app = QApplication(sys.argv)
     form = Form()
     form.show()

@@ -115,7 +115,7 @@ def main():
     Term_list.sort(key=functools.cmp_to_key(my_compare))
     # 保存为json文件
     with open('invert_index.txt', 'w') as fp:
-        fp.write('{')
+        fp.write('{"":{}')
         for term in Term_list:
             # 这个最后要打开json把第一个逗号删掉
             # fp.write(f'\t"{term.get_term()}_{term.get_df()}":')
